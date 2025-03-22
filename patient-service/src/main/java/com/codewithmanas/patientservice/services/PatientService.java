@@ -1,12 +1,13 @@
 package com.codewithmanas.patientservice.services;
 
+import com.codewithmanas.patientservice.dtos.PatientRequestDTO;
 import com.codewithmanas.patientservice.dtos.PatientResponseDTO;
 import com.codewithmanas.patientservice.entities.Patient;
+import com.codewithmanas.patientservice.exceptions.EmailAlreadyExistsException;
 import com.codewithmanas.patientservice.mappers.PatientMapper;
 import com.codewithmanas.patientservice.repositories.PatientRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,5 +28,17 @@ public class PatientService {
         //.map(patient -> PatientMapper.toDTO(patient)).toList();
 
         return patientResponseDTOs;
+    }
+
+
+    public PatientResponseDTO createPatient(PatientRequestDTO patientRequestDTO) {
+        if(patientRepository.existsByEmail(patientRequestDTO.getEmail())) {
+            throw new EmailAlreadyExistsException("A patient with this email - "+ patientRequestDTO.getEmail() + " already exists ");
+        }
+
+        Patient newPatient = patientRepository.save(PatientMapper.toEntity(patientRequestDTO));
+
+        // an email address must be unique
+        return PatientMapper.toDTO(newPatient);
     }
 }
