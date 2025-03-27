@@ -5,6 +5,7 @@ import com.codewithmanas.patientservice.dtos.PatientResponseDTO;
 import com.codewithmanas.patientservice.entities.Patient;
 import com.codewithmanas.patientservice.exceptions.EmailAlreadyExistsException;
 import com.codewithmanas.patientservice.exceptions.PatientNotFoundException;
+import com.codewithmanas.patientservice.grpc.BillingServiceGrpcClient;
 import com.codewithmanas.patientservice.mappers.PatientMapper;
 import com.codewithmanas.patientservice.repositories.PatientRepository;
 import org.springframework.stereotype.Service;
@@ -15,10 +16,12 @@ import java.util.UUID;
 
 @Service
 public class PatientService {
-    private PatientRepository patientRepository;
+    private final PatientRepository patientRepository;
+    private final BillingServiceGrpcClient billingServiceGrpcClient;
 
-    public PatientService(PatientRepository patientRepository) {
+    public PatientService(PatientRepository patientRepository, BillingServiceGrpcClient billingServiceGrpcClient) {
         this.patientRepository = patientRepository;
+        this.billingServiceGrpcClient = billingServiceGrpcClient;
     }
 
     public List<PatientResponseDTO> getPatients () {
@@ -40,6 +43,8 @@ public class PatientService {
         }
 
         Patient newPatient = patientRepository.save(PatientMapper.toEntity(patientRequestDTO));
+
+        billingServiceGrpcClient.createBillingAccount(newPatient.getId().toString(), newPatient.getName(), newPatient.getEmail());
 
         // an email address must be unique
         return PatientMapper.toDTO(newPatient);
