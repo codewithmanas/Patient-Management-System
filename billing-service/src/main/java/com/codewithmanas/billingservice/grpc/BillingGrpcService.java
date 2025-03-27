@@ -18,9 +18,11 @@ public class BillingGrpcService extends BillingServiceImplBase {
     public void createBillingAccount(BillingRequest billingRequest,
         StreamObserver<BillingResponse> responseObserver) {
 
-        log.info("Create billing account request received {}", billingRequest.toString());
+        log.info("---Create billing account request received {}", billingRequest.toString());
 
         // Business Logic - e.g save to database, perform calculates etc
+
+        log.info("---Billing account request received and created on billing service via GPRC: {}", billingRequest);
 
         BillingResponse response = BillingResponse.newBuilder()
                 .setAccountId("12345")
